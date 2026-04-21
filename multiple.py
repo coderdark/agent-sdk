@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from agents import Agent, Runner, trace
-from openai.types.responses import ResponseTextDeltaEvent
 import asyncio
 
 load_dotenv(override=True)
@@ -27,14 +26,6 @@ async def main():
         name="Selector", instructions=selector_instruction, model="gpt-4o-mini"
     )
 
-    # result = Runner.run_streamed(senior_agent, input="Create a function to calculate tip based on the total bill amount and tip percentage.")
-
-    # async for event in result.stream_events():
-    #     if event.type == "raw_response_event" and isinstance(
-    #         event.data, ResponseTextDeltaEvent
-    #     ):
-    #         print(event.data.delta, end="", flush=True)
-
     message = "Create a function to calculate tip based on the total bill amount and tip percentage."
 
     with trace("Parallel execution"):
@@ -53,9 +44,6 @@ async def main():
     best_code_block = await Runner.run(selector_agent, code_blocks)
 
     print(f"Best code block:\n\n {best_code_block.final_output}")
-
-    # for output in outputs:
-    #     print(output)
 
 
 if __name__ == "__main__":
