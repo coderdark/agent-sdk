@@ -1,55 +1,75 @@
 from dotenv import load_dotenv
-from agents import Agent, Runner, trace
+from agents import Agent, Runner, trace, Tool
 import asyncio
 
 load_dotenv(override=True)
 
 
 async def main():
-    todo_instructions = "You write a todo list for the features that need to be implemented."
+    todo_instructions = (
+        "You write a todo list for the features that need to be implemented."
+    )
     todo_reviewer_instructions = "You review the todo list and make sure it is complete and if there is a missing feature, add it."
 
     todo_creator_agent = Agent(
-        name="Todo List Creator",
-        instructions=todo_instructions,
-        model="gpt-4o-mini"
+        name="Todo List Creator", instructions=todo_instructions, model="gpt-4o-mini"
     )
     todo_reviewer_agent = Agent(
         name="Todo Reviewer",
         instructions=todo_reviewer_instructions,
-        model="gpt-4o-mini"
+        model="gpt-4o-mini",
     )
 
-    tool1 = todo_creator_agent.as_tool(tool_name="todo_creator_agent", tool_description="Write a todo list for the features that need to implemented only")
-    tool2 = todo_reviewer_agent.as_tool(tool_name="todo_reviewer_agent", tool_description="Review the todo list to make sure is good for development")
-  
+    tool1 = todo_creator_agent.as_tool(
+        tool_name="todo_creator_agent",
+        tool_description="Write a todo list for the features that need to implemented only",
+    )
+    tool2 = todo_reviewer_agent.as_tool(
+        tool_name="todo_reviewer_agent",
+        tool_description="Review the todo list to make sure is good for development",
+    )
 
-    tools = [tool1, tool2]
-    
+    tools: list[Tool] = [tool1, tool2]
+
     react_dev_instructions = "You are react developer with over 10 years of experience. You create react code using react best practices. Only using functional components."
     python_dev_instructions = "You are python developer with over 10 years of experience. You create python code using python best practices. Only using functional components."
+    code_reviewer_instructions = "You are a senior developer with over 10 years of experience.  You job is to review code from any language.  Make sure it follows best practices for the language being used, SOLID, KISS and DRY principles.  Fix the code if needed."
 
     react_agent = Agent(
         name="React Developer", instructions=react_dev_instructions, model="gpt-4o-mini"
     )
     python_agent = Agent(
-        name="Python Developer", instructions=python_dev_instructions, model="gpt-4o-mini"
+        name="Python Developer",
+        instructions=python_dev_instructions,
+        model="gpt-4o-mini",
+    )
+    code_reviewer_agent = Agent(
+        name="Code Reviewer",
+        instructions=code_reviewer_instructions,
+        model="gpt-4o-mini",
     )
 
     description = "Write the code needed to fulfill the feature requests list. Only provide the code and nothing else"
 
     tool3 = react_agent.as_tool(tool_name="react_agent", tool_description=description)
     tool4 = python_agent.as_tool(tool_name="python_agent", tool_description=description)
+    tool5 = code_reviewer_agent.as_tool(
+        tool_name="code_reviewer_agent",
+        tool_description="Review the code and fix it. Look up for security vulnerabilities and any vulnerabilities.",
+    )
 
-    tools2 = [tool3, tool4]
+    tools2: list[Tool] = [tool3, tool4, tool5]
 
     engineering_manager_instructions = """
     You are an Engineer Manager. Your goal is to utilize any of the two developer tools for react or python to implement the feature requests provided by the engineering manager"
-    You will use the react developer tool to create react code.
-    You will use the python developer tool to create python code. 
-    You do not write any code yourself. 
-    You will only use the tools to write the code.
-    You return only code and nothing else.
+    1. To write the code: use the react developer tool to create react code or use the python developer tool to create python code. 
+    2. Review the code created by the react or python tools.  Fix it if needed. 
+    3. Return the final code from the reviewer once done/
+
+    Crucial Rules:
+    - You do not write any code yourself. 
+    - You will only use the tools to write the code.
+    - You return only code and nothing else.
     """
 
     engineer_manager = Agent(
@@ -57,10 +77,8 @@ async def main():
         instructions=engineering_manager_instructions,
         tools=tools2,
         model="gpt-4o-mini",
-        handoff_description="To convert an application feature list into code and implement it."
+        handoff_description="To convert an application feature list into code and implement it.",
     )
-
-    handoffs= [engineer_manager]
 
     po_instructions = """
     You are a product owner with over 10 of experience in software. 
@@ -80,7 +98,7 @@ async def main():
         instructions=po_instructions,
         tools=tools,
         model="gpt-4o-mini",
-        handoffs=handoffs,
+        handoffs=[engineer_manager],
     )
 
     message = "create a react application for calculating tips based on the total bill amount and tip'"
@@ -89,6 +107,7 @@ async def main():
         result = await Runner.run(po_agent, message)
 
         print(result.final_output)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

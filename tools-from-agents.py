@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from agents import Agent, Runner, trace
+from agents import Agent, Runner, trace, Tool
 import asyncio
 
 load_dotenv(override=True)
@@ -30,7 +30,7 @@ async def main():
         tool_name="staff_software_agent", tool_description=description
     )
 
-    tools = [tool1, tool2, tool3]
+    tools:list[Tool] = [tool1, tool2, tool3]
 
     instructions = """
 You are an Engineer Manager. Your goal is to find the single best function to calculate tips in python using the SOLID, DRY, KISS and CLEAN principles.
