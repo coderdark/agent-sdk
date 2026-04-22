@@ -58,6 +58,8 @@ An `Engineer Manager` agent receives those tools and is instructed to:
 
 This example shows how tools and handoffs can work together: tools help an agent complete a task, while handoffs move control to another specialized agent.
 
+![Trace of the PO agent using todo tools, then handing off to the engineering manager to complete code tasks](images/trace.png)
+
 ## Tools vs Handoffs
 
 Tools are capabilities an agent can call while it remains in control of the conversation. In this repo, `Agent.as_tool(...)` turns another agent into a callable tool, so a manager-style agent can ask specialist agents to draft code, review code, or create todo lists.
@@ -81,6 +83,8 @@ Use tools when one agent should orchestrate smaller helper actions. Use handoffs
 ├── .env.example
 ├── .python-version
 ├── handoffs.py
+├── images/
+│   └── trace.png
 ├── multiple-agents.py
 ├── pyproject.toml
 ├── README.md
